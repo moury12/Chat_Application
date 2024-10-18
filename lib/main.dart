@@ -1,7 +1,9 @@
-import 'package:chat_application/pages/chat_page.dart';
+import 'package:chat_application/views/splash_page.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+void main() async{
+  await Hive.initFlutter();
   runApp(const MyApp());
 }
 
@@ -14,7 +16,7 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       title: 'Flutter Demo',
 
-      home: ChatScreen(),
+      home: SplashScreen(),
     );
   }
 }

@@ -1,4 +1,4 @@
-import 'package:chat_application/services/chat_service.dart';
+import 'package:chat_application/core/base/services/socket_service.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {

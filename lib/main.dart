@@ -1,5 +1,8 @@
+import 'package:chat_application/core/constants/bloc_providers.dart';
+import 'package:chat_application/views/auth-views/auth_page.dart';
 import 'package:chat_application/views/splash_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async{
@@ -14,10 +17,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Flutter Demo',
+    return MultiBlocProvider(
+      providers: [...BlockProviders.allBlocProviders],
+      child: const MaterialApp(
+        title: 'Flutter Demo',
 
-      home: SplashScreen(),
+        home: AuthScreen(),
+      ),
     );
   }
 }

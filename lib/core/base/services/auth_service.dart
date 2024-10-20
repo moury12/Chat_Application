@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 
 class AuthService {
-  late DioManager dioManager;
+   DioManager dioManager =DioManager.instance;
   Future<String?> loginRequest({
     required String email,
     required String password,

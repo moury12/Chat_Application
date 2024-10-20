@@ -3,8 +3,16 @@ part of 'auth_bloc.dart';
 @immutable
 sealed class AuthState {}
 
-final class AuthInitial extends AuthState {
-  final bool isLogedIn;
+final class AuthInitial extends AuthState {}
+class Authenticated extends AuthState{
+  final String token;
 
-  AuthInitial({required this.isLogedIn});
+  Authenticated(this.token);
+
+}
+class UnAuthecticated extends AuthState{
+
+}
+class AuthLoading extends AuthState{
+
 }

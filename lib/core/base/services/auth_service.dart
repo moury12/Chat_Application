@@ -18,7 +18,7 @@ class AuthService {
       if (responseData['status'] != null && responseData['status']) {
         debugPrint(responseData.toString());
         token = responseData['token'];
-        Boxes.getUserData().put("token", token);
+        Boxes.getUserToken().put("token", token);
       } else {
         debugPrint(responseData['message']);
       }

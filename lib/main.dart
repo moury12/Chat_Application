@@ -1,6 +1,6 @@
+import 'package:chat_application/core/constants/app/color_constant.dart';
 import 'package:chat_application/core/constants/bloc_providers.dart';
 import 'package:chat_application/views/auth-views/auth_page.dart';
-import 'package:chat_application/views/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -19,10 +19,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [...BlockProviders.allBlocProviders],
-      child: const MaterialApp(
+      child: MaterialApp(
         title: 'Flutter Demo',
-
-        home: AuthScreen(),
+        theme:ThemeData(
+          listTileTheme: ListTileThemeData(textColor: ColorConstant.black)
+        ) ,
+        home: const AuthScreen(),
       ),
     );
   }

@@ -1,6 +1,6 @@
-import 'package:chat_application/core/base/blocs/auth_bloc.dart';
+import 'package:chat_application/core/base/blocs/auth/auth_bloc.dart';
 import 'package:chat_application/views/auth-views/login_page.dart';
-import 'package:chat_application/views/chat_page.dart';
+import 'package:chat_application/views/chat/chat_page.dart';
 import 'package:chat_application/views/splash_page.dart';
 import 'package:chat_application/views/users/user_list_page.dart';
 import 'package:flutter/material.dart';

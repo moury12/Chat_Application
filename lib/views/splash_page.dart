@@ -1,3 +1,4 @@
+import 'package:chat_application/core/components/default_loading.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -7,7 +8,7 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      body: Center(child: CircularProgressIndicator(),),
+      body: Center(child: DefaultLoading(),),
     );
   }
 }

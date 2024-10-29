@@ -1,8 +1,10 @@
+import 'package:chat_application/core/base/models/user_model.dart';
 import 'package:chat_application/core/base/services/socket_service.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final UserModel user;
+  const ChatScreen({super.key, required this.user});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -21,7 +23,6 @@ class _ChatScreenState extends State<ChatScreen> {
    ChatService().disconnect();
    messageController.dispose();
    recipientController.dispose();
-    // TODO: implement dispose
     super.dispose();
   }
   void sendMessage(){
@@ -33,7 +34,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('data'),),
+      appBar: AppBar(title: Text(widget.user.email??''),),
       body:Column(children: [
         TextField(
           controller: recipientController,

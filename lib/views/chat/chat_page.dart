@@ -1,5 +1,5 @@
 import 'package:chat_application/core/base/models/user_model.dart';
-import 'package:chat_application/core/base/services/socket_service.dart';
+import 'package:chat_application/core/base/services/chat_service.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -16,11 +16,11 @@ class _ChatScreenState extends State<ChatScreen> {
  @override
   void initState() {
     super.initState();
-    ChatService().initializeSocket();
+    ChatService(currentUserId: ).initializeSocket();
   }
   @override
   void dispose() {
-   ChatService().disconnect();
+   ChatService(currentUserId: ).disconnect();
    messageController.dispose();
    recipientController.dispose();
     super.dispose();
@@ -28,7 +28,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void sendMessage(){
    String message =messageController.text;
    String recipient = recipientController.text;
-   ChatService().sendMessage(message, recipient);
+   ChatService(currentUserId: ).sendMessage(message, recipient);
    messageController.clear();
   }
   @override

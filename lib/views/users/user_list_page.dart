@@ -1,4 +1,5 @@
 import 'package:chat_application/core/base/blocs/user/all-user/user_bloc.dart';
+import 'package:chat_application/core/base/blocs/user/user-own/user_info_bloc.dart';
 import 'package:chat_application/core/components/drawer/custom_drawer.dart';
 import 'package:chat_application/core/utils/navigate_util.dart';
 import 'package:chat_application/views/chat/chat_page.dart';
@@ -7,9 +8,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/components/default_loading.dart';
 
-class UserListScreen extends StatelessWidget {
+class UserListScreen extends StatefulWidget {
   const UserListScreen({super.key});
 
+  @override
+  State<UserListScreen> createState() => _UserListScreenState();
+}
+
+class _UserListScreenState extends State<UserListScreen> {
+  @override
+  void initState() {
+    context.read<UserBloc>().add(FetchUsersEvent());
+    context.read<UserInfoBloc>().add(FetchUserInfoEvent());
+
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +33,6 @@ class UserListScreen extends StatelessWidget {
       body: BlocBuilder<UserBloc, UserState>(
         builder: (context, state) {
           if (state is UserLoadingState) {
-            context.read<UserBloc>().add(FetchUsersEvent());
             return const Center(
               child: DefaultLoading(),
             );
@@ -32,12 +44,22 @@ class UserListScreen extends StatelessWidget {
                 return ListTile(
                   title: Text(state.users[index].username ?? ''),
                   subtitle: Text(state.users[index].email ?? ''),
-                  trailing: IconButton(
-                      onPressed: () {
-                        NavigateUtil.navigateToView(
-                            context,  ChatScreen(user: state.users[index],));
-                      },
-                      icon: const Icon(Icons.chat)),
+                  trailing: BlocBuilder<UserInfoBloc, UserInfoState>(
+                    builder: (context, userState) {
+                     if(userState is UserInfoLoadedState) {
+                        return IconButton(
+                            onPressed: () {
+                              NavigateUtil.navigateToView(
+                                  context,
+                                  ChatScreen(recipientUser: state.users[index],
+                                    currentUser:userState.userInfo,));
+                            },
+                            icon: const Icon(Icons.chat));
+                      }
+                     return SizedBox.shrink();
+                    },
+
+                  ),
                 );
               },
             );

@@ -43,13 +43,20 @@ Future<void> initializeSocket()async{
     }
   });
   socket?.on('chat message', (data) {
+    final message = MessageModel(
+      from: data['from'],
+      to: currentUserId,
+      message: data['message'],
+      timeStamp: DateTime.now().toString(),
+    );
+    messageController.add(message);
     debugPrint('New message from ${data['from']}: ${data['message']}');
 
   },);
   return completer.future;
 }
 void sendMessage(String message,String recipient)async{
- await initializeSocket();
+ // await initializeSocket();
   debugPrint('Socket connected: ${socket?.connected}');
   debugPrint('Socket : ${socket?.toString()}');
   if(socket!= null && socket!.connected){

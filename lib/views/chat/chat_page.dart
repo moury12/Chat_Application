@@ -8,8 +8,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ChatScreen extends StatefulWidget {
   final UserModel recipientUser;
   final UserModel currentUser;
-  const ChatScreen(
-      {super.key, required this.recipientUser, required this.currentUser});
+
+  const ChatScreen({
+    super.key,
+    required this.recipientUser,
+    required this.currentUser,
+  });
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -18,11 +22,16 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController messageController = TextEditingController();
   final TextEditingController recipientController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
-    SocketService(currentUserId: widget.currentUser.id!).initializeSocket();
-    // context.read<MessagingBloc>().add(FetchMessageEvent(user1: widget.recipientUser.id??'', user2: widget.currentUser.id??''));
+
+    final messagingBloc = context.read<MessagingBloc>();
+    messagingBloc.add(FetchMessageEvent(
+      user1: widget.recipientUser.id ?? '',
+      user2: widget.currentUser.id ?? '',
+    ));
   }
 
   @override
@@ -36,8 +45,12 @@ class _ChatScreenState extends State<ChatScreen> {
   void sendMessage() {
     String message = messageController.text;
     String recipient = widget.recipientUser.id ?? '';
-    SocketService(currentUserId: widget.currentUser.id!)
-        .sendMessage(message, recipient);
+    if (message.isNotEmpty) {
+      final messagingBloc =     BlocProvider.of<MessagingBloc>(context);
+
+      messagingBloc.chatService.sendMessage(message, recipient);
+      messageController.clear();
+    }
   }
 
   @override
@@ -46,29 +59,22 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         title: Text(widget.recipientUser.email ?? ''),
       ),
-      body: BlocProvider(
-  create: (context) =>MessagingBloc(
-     SocketService(currentUserId: widget.currentUser.id!),
-  )..add(FetchMessageEvent(
-    user1: widget.recipientUser.id ?? '',
-    user2: widget.currentUser.id ?? '',
-  )),
-  child: BlocBuilder<MessagingBloc, MessagingState>(
+      body: BlocBuilder<MessagingBloc, MessagingState>(
         builder: (context, state) {
           if (state is MessagingLoadingState) {
             return const DefaultLoading();
           } else if (state is MessagingLoadedState) {
-
             return ListView.builder(
-
               itemCount: state.messages.length,
               itemBuilder: (context, index) {
                 return Column(
-                  crossAxisAlignment: state.messages[index].from==widget.currentUser.id?CrossAxisAlignment.start:CrossAxisAlignment.end,
-
+                  crossAxisAlignment: state.messages[index].from ==
+                      widget.currentUser.id
+                      ? CrossAxisAlignment.start
+                      : CrossAxisAlignment.end,
                   children: [
-                    Text(state.messages[index].from??''),
-                    Text(state.messages[index].message??'')
+                    Text(state.messages[index].from ?? ''),
+                    Text(state.messages[index].message ?? ''),
                   ],
                 );
               },
@@ -77,7 +83,6 @@ class _ChatScreenState extends State<ChatScreen> {
           return const SizedBox.shrink();
         },
       ),
-),
       bottomSheet: Row(
         children: [
           Expanded(
@@ -90,13 +95,22 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           Expanded(
             child: ElevatedButton(
-                onPressed: () {
-                  sendMessage();
-                },
-                child: const Text('send message')),
-          )
+              onPressed: () {
+                String message = messageController.text;
+                String recipient = widget.recipientUser.id ?? '';
+                if (message.isNotEmpty) {
+                  final messagingBloc = context.read<MessagingBloc>();
+
+                  messagingBloc.chatService.sendMessage(message, recipient);
+                  messageController.clear();
+                }
+              },
+              child: const Text('Send Message'),
+            ),
+          ),
         ],
       ),
     );
   }
 }
+

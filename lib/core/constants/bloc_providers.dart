@@ -11,6 +11,6 @@ class BlockProviders {
     ),
     BlocProvider(create: (context) => UserBloc()),
     BlocProvider(create: (context) => UserInfoBloc()),
-    // BlocProvider(create: (context) => MessagingBloc()),
+     // BlocProvider(create: (context) => MessagingBloc()),
   ];
 }

@@ -1,5 +1,7 @@
+import 'package:chat_application/core/base/blocs/chat/messaging_bloc.dart';
 import 'package:chat_application/core/base/blocs/user/all-user/user_bloc.dart';
 import 'package:chat_application/core/base/blocs/user/user-own/user_info_bloc.dart';
+import 'package:chat_application/core/base/services/socket_service.dart';
 import 'package:chat_application/core/components/drawer/custom_drawer.dart';
 import 'package:chat_application/core/utils/navigate_util.dart';
 import 'package:chat_application/views/chat/chat_page.dart';
@@ -51,8 +53,15 @@ class _UserListScreenState extends State<UserListScreen> {
                             onPressed: () {
                               NavigateUtil.navigateToView(
                                   context,
-                                  ChatScreen(recipientUser: state.users[index],
-                                    currentUser:userState.userInfo,));
+                                BlocProvider(
+                                  create: (context) => MessagingBloc(SocketService(
+                                      currentUserId: userState.userInfo.id!)),
+                                  child: ChatScreen(
+                                    recipientUser:  state.users[index],
+                                    currentUser: userState.userInfo,
+                                  ),
+                                )
+                              );
                             },
                             icon: const Icon(Icons.chat));
                       }

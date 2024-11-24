@@ -32,16 +32,6 @@ Future<void> initializeSocket()async{
     socket!.emit('register', currentUserId);
     completer.complete();
   },);
-
-  socket?.on('disconnect', (_) {
-    debugPrint('Disconnected from the server');
-  });
-  socket!.on('connect_error', (error) {
-    debugPrint('Connection Error: $error');
-    if (!completer.isCompleted) {
-      completer.completeError(error);  // In case of connection error
-    }
-  });
   socket?.on('chat message', (data) {
     final message = MessageModel(
       from: data['from'],
@@ -53,6 +43,16 @@ Future<void> initializeSocket()async{
     debugPrint('New message from ${data['from']}: ${data['message']}');
 
   },);
+
+  socket?.on('disconnect', (_) {
+    debugPrint('Disconnected from the server');
+  });
+  socket!.on('connect_error', (error) {
+    debugPrint('Connection Error: $error');
+    if (!completer.isCompleted) {
+      completer.completeError(error);  // In case of connection error
+    }
+  });
   return completer.future;
 }
 void sendMessage(String message,String recipient)async{

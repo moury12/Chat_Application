@@ -1,111 +1,156 @@
 import 'package:chat_application/core/base/blocs/chat/messaging_bloc.dart';
+import 'package:chat_application/core/base/models/message_model.dart';
 import 'package:chat_application/core/base/models/user_model.dart';
+import 'package:chat_application/core/base/services/chat_service.dart';
 import 'package:chat_application/core/base/services/socket_service.dart';
 import 'package:chat_application/core/components/default_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChatScreen extends StatefulWidget {
-  final UserModel recipientUser;
   final UserModel currentUser;
+  final UserModel recipientUser;
 
   const ChatScreen({
-    super.key,
-    required this.recipientUser,
     required this.currentUser,
-  });
+    required this.recipientUser,
+    Key? key,
+  }) : super(key: key);
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  late SocketService socketService;
   final TextEditingController messageController = TextEditingController();
-  final TextEditingController recipientController = TextEditingController();
+  List<MessageModel> messages = [];
 
   @override
   void initState() {
     super.initState();
 
-    final messagingBloc = context.read<MessagingBloc>();
-    messagingBloc.add(FetchMessageEvent(
-      user1: widget.recipientUser.id ?? '',
-      user2: widget.currentUser.id ?? '',
-    ));
+    // Initialize SocketService
+    socketService = SocketService(currentUserId: widget.currentUser.id ?? '');
+
+    // Listen to the message stream
+    socketService.messageStream.listen((newMessage) {
+      setState(() {
+        messages.add(newMessage);
+      });
+    });
+
+    // Load initial messages
+    _fetchInitialMessages();
+  }
+
+  Future<void> _fetchInitialMessages() async {
+    List<MessageModel> initialMessages = await ChatService().getMessages(
+      user1: widget.currentUser.id ?? '',
+      user2: widget.recipientUser.id ?? '',
+    );
+    setState(() {
+      messages = initialMessages;
+    });
+  }
+
+  void _sendMessage() {
+    String message = messageController.text.trim();
+    if (message.isNotEmpty) {
+      socketService.sendMessage(message, widget.recipientUser.id ?? '');
+      setState(() {
+        messages.add(
+          MessageModel(
+            from: widget.currentUser.id,
+            to: widget.recipientUser.id,
+            message: message,
+            timeStamp: DateTime.now().toString(),
+          ),
+        );
+      });
+      messageController.clear();
+    }
   }
 
   @override
   void dispose() {
-    SocketService(currentUserId: widget.currentUser.id!).disconnect();
+    socketService.disconnect();
     messageController.dispose();
-    recipientController.dispose();
     super.dispose();
-  }
-
-  void sendMessage() {
-    String message = messageController.text;
-    String recipient = widget.recipientUser.id ?? '';
-    if (message.isNotEmpty) {
-      final messagingBloc =     BlocProvider.of<MessagingBloc>(context);
-
-      messagingBloc.chatService.sendMessage(message, recipient);
-      messageController.clear();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.recipientUser.email ?? ''),
+        title: Text(widget.recipientUser.email ?? 'Chat'),
       ),
-      body: BlocBuilder<MessagingBloc, MessagingState>(
-        builder: (context, state) {
-          if (state is MessagingLoadingState) {
-            return const DefaultLoading();
-          } else if (state is MessagingLoadedState) {
-            return ListView.builder(
-              itemCount: state.messages.length,
+      body: Column(
+        children: [
+          // Message List
+          Expanded(
+            child: ListView.builder(
+              itemCount: messages.length,
               itemBuilder: (context, index) {
-                return Column(
-                  crossAxisAlignment: state.messages[index].from ==
-                      widget.currentUser.id
-                      ? CrossAxisAlignment.start
-                      : CrossAxisAlignment.end,
-                  children: [
-                    Text(state.messages[index].from ?? ''),
-                    Text(state.messages[index].message ?? ''),
-                  ],
+                final message = messages[index];
+                final isCurrentUser = message.from == widget.currentUser.id;
+
+                return Align(
+                  alignment:
+                  isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 5.0,
+                      horizontal: 10.0,
+                    ),
+                    padding: const EdgeInsets.all(10.0),
+                    decoration: BoxDecoration(
+                      color: isCurrentUser ? Colors.blue[100] : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          message.from ?? '',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          message.message ?? '',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               },
-            );
-          }
-          return const SizedBox.shrink();
-        },
-      ),
-      bottomSheet: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: messageController,
-              decoration: const InputDecoration(
-                labelText: 'Message',
-              ),
             ),
           ),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                String message = messageController.text;
-                String recipient = widget.recipientUser.id ?? '';
-                if (message.isNotEmpty) {
-                  final messagingBloc = context.read<MessagingBloc>();
-
-                  messagingBloc.chatService.sendMessage(message, recipient);
-                  messageController.clear();
-                }
-              },
-              child: const Text('Send Message'),
+          // Message Input
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: messageController,
+                    decoration: const InputDecoration(
+                      labelText: 'Type a message',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8.0),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: _sendMessage,
+                ),
+              ],
             ),
           ),
         ],
@@ -113,4 +158,5 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
+
 

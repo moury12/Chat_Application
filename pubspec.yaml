@@ -39,6 +39,8 @@ dependencies:
   dio: ^5.7.0
   flutter_bloc: ^8.1.6
   hive_flutter: ^1.1.0
+  flutter_local_notifications: ^18.0.1
+  workmanager: ^0.5.2
 
 dev_dependencies:
   flutter_test:

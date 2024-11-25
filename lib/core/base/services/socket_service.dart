@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:chat_application/core/base/models/message_model.dart';
+import 'package:chat_application/core/base/services/notification_service.dart';
 import 'package:chat_application/core/constants/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -32,6 +34,11 @@ Future<void> initializeSocket()async{
     socket!.emit('register', currentUserId);
     completer.complete();
   },);
+//   socket?.on('notification', (data) {
+//     log('New notification: ${data['message']} from ${data['from']}');
+// NotificationService.showNotification(1, 'New message from ${data['from']}',
+//     data['message']);
+//   },);
   socket?.on('chat message', (data) {
     final message = MessageModel(
       from: data['from'],
@@ -40,6 +47,8 @@ Future<void> initializeSocket()async{
       timeStamp: DateTime.now().toString(),
     );
     messageController.add(message);
+    NotificationService.showNotification(1, 'New message from ${data['from']}',
+        data['message']);
     debugPrint('New message from ${data['from']}: ${data['message']}');
 
   },);
@@ -65,6 +74,11 @@ void sendMessage(String message,String recipient)async{
       'to': recipient,         // Recipient's unique user ID
       'message': message,
     });
+    // socket?.on('notification', (data) {
+    //   debugPrint('New notification: ${data['message']} from ${data['from']}');
+    //   NotificationService.showNotification(1, 'New message from ${data['from']}',
+    //       data['message']);
+    // },);
     debugPrint('Message sent: $message');
   }else{
     debugPrint('Socket is not connected');

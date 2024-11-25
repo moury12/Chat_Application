@@ -19,7 +19,6 @@ class UserService {
       users = responseData
           .map<UserModel>((val) => UserModel.fromJson(val))
           .toList();
-
       return users;
     } catch (e) {
       debugPrint(e.toString());
@@ -36,6 +35,8 @@ class UserService {
           }));
       debugPrint(response.toString());
        user =UserModel.fromJson(response.data);
+      Boxes.getUserToken().put('user_id', user.id);
+
       return user;
     } catch (e) {
       debugPrint(e.toString());
